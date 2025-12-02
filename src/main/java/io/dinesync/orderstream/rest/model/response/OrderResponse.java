@@ -5,12 +5,13 @@ import io.dinesync.orderstream.rest.model.dto.OrderItemResponseDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record OrderResponse(
         Long id,
         Integer tableNumber,
         OrderStatus status,
-        OrderItemResponseDto orderItems,
+        List<OrderItemResponseDto> orderItems,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         BigDecimal totalAmount

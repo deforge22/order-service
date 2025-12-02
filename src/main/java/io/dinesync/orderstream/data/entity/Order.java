@@ -32,7 +32,11 @@ public class Order {
     @Builder.Default
     private OrderStatus status = OrderStatus.PENDING;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "order",
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST},
+            orphanRemoval = true
+    )
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
@@ -47,6 +51,11 @@ public class Order {
     public void addOrderItem(OrderItem orderItem) {
         orderItems.add(orderItem);
         orderItem.setOrder(this);
+    }
+
+    public void addOrderItems(List<OrderItem> orderItems) {
+        this.orderItems.addAll(orderItems);
+        orderItems.forEach(orderItem -> orderItem.setOrder(this));
     }
 
     public void removeOrderItem(OrderItem orderItem) {

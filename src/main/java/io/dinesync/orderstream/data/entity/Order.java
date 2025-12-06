@@ -40,13 +40,20 @@ public class Order {
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 
     public void addOrderItem(OrderItem orderItem) {
         orderItems.add(orderItem);

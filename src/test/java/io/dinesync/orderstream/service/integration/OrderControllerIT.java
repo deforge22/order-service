@@ -120,20 +120,20 @@ public class OrderControllerIT {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("All orders fetched successfully"))
+                .andExpect(jsonPath("$.data[0].tableNumber").value(11));
 
     }
 
     private void createOrdersForGetOrdersSuccess() throws Exception {
 
         io.dinesync.orderstream.data.entity.Order order1 = io.dinesync.orderstream.data.entity.Order.builder()
-                .id(1L)
-                .tableNumber(12)
+                .tableNumber(11)
                 .status(OrderStatus.PENDING)
                 .createdAt(LocalDateTime.now().minusMinutes(10))
                 .build();
 
         io.dinesync.orderstream.data.entity.Order order2 = io.dinesync.orderstream.data.entity.Order.builder()
-                .id(1L)
                 .tableNumber(12)
                 .status(OrderStatus.PENDING)
                 .createdAt(LocalDateTime.now().minusMinutes(20))

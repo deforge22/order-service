@@ -1,6 +1,8 @@
 package io.dinesync.orderstream.service;
 
 import io.dinesync.orderstream.data.repository.OrderRepository;
+import io.dinesync.orderstream.enums.OrderStatus;
+import io.dinesync.orderstream.exception.OrderNotFoundException;
 import io.dinesync.orderstream.rest.model.request.OrderRequest;
 import io.dinesync.orderstream.rest.model.response.OrderResponse;
 import io.dinesync.orderstream.utility.mapper.OrderItemMapper;
@@ -32,5 +34,21 @@ public class OrderService {
     public List<OrderResponse> getAllOrders() {
         var allOrders = orderRepository.findAllByOrderByCreatedAtDesc();
         return orderMapper.toResponse(allOrders);
+    }
+
+    public OrderResponse getOrderById(Long id) {
+        var orderById = orderRepository.findById(id).orElseThrow(
+                () -> new OrderNotFoundException(id)
+        );
+        return orderMapper.toResponse(orderById);
+    }
+
+    public OrderResponse updateOrderStatus(Long id, String status) {
+        var orderById = orderRepository.findById(id).orElseThrow(
+                () -> new OrderNotFoundException(id)
+        );
+        orderById.setStatus(OrderStatus.valueOf(status.toUpperCase()));
+        var updatedOrder = orderRepository.save(orderById);
+        return orderMapper.toResponse(updatedOrder);
     }
 }

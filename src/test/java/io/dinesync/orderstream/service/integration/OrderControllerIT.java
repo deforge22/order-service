@@ -53,8 +53,8 @@ public class OrderControllerIT {
         var request = new OrderRequest(
                 12,
                 List.of(
-                        new OrderItemDto("Burger", 2, new BigDecimal("12.99"), "No pickles"),
-                        new OrderItemDto("Fries", 1, new BigDecimal("4.50"), null)
+                        new OrderItemDto("Burger", BigDecimal.valueOf(2), new BigDecimal("12.99"), "No pickles"),
+                        new OrderItemDto("Fries", BigDecimal.ONE, new BigDecimal("4.50"), null)
                 )
         );
 
@@ -95,8 +95,8 @@ public class OrderControllerIT {
         var request = new OrderRequest(
                 -12,
                 List.of(
-                        new OrderItemDto("Burger", 2, new BigDecimal("12.99"), "No pickles"),
-                        new OrderItemDto("Fries", 1, new BigDecimal("4.50"), null)
+                        new OrderItemDto("Burger", BigDecimal.valueOf(2), new BigDecimal("12.99"), "No pickles"),
+                        new OrderItemDto("Fries", BigDecimal.ONE, new BigDecimal("4.50"), null)
                 )
         );
 

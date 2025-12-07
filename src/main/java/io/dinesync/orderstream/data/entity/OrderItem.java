@@ -27,7 +27,7 @@ public class OrderItem {
     private String itemName;
 
     @Column(name = "quantity", nullable = false)
-    private Integer quantity;
+    private BigDecimal quantity;
 
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
@@ -36,6 +36,6 @@ public class OrderItem {
     private String notes;
 
     public BigDecimal getSubtotal() {
-        return unitPrice.multiply(BigDecimal.valueOf(quantity));
+        return unitPrice.multiply(quantity);
     }
 }

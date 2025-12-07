@@ -67,7 +67,7 @@ public class OrderServiceUT {
     @BeforeEach
     void setUp() {
         firstOrderItemDto =
-                new OrderItemDto("Burger", 2, new BigDecimal("12.99"), "No pickles");
+                new OrderItemDto("Burger", BigDecimal.valueOf(2), new BigDecimal("12.99"), "No pickles");
         firstOderRequest = new OrderRequest(5, List.of(firstOrderItemDto));
 
         firstOrder = Order.builder()
@@ -81,13 +81,13 @@ public class OrderServiceUT {
         firstOrderItem = OrderItem.builder()
                 .id(1L)
                 .itemName("Burger")
-                .quantity(2)
+                .quantity(BigDecimal.valueOf(2))
                 .unitPrice(new BigDecimal("12.99"))
                 .notes("No pickles")
                 .build();
 
         firstOrderItemResponseDto = new OrderItemResponseDto(
-                1L, "Burger", 2, new BigDecimal("12.99"), "No pickles", BigDecimal.ZERO);
+                1L, "Burger", BigDecimal.valueOf(2), new BigDecimal("12.99"), "No pickles", BigDecimal.ZERO);
 
         firstOrderResponse = new OrderResponse(
                 1L,
@@ -105,7 +105,7 @@ public class OrderServiceUT {
                 12L,
                 secondOrder,
                 "Apple",
-                1,
+                BigDecimal.ONE,
                 TEN,
                 "Green Apple"
         );
@@ -118,8 +118,15 @@ public class OrderServiceUT {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        secondOrderItemDto = new  OrderItemDto("Apple", 1, TEN, "Green Apple");
-        secondOrderItemResponseDto = new OrderItemResponseDto(12L, "Apple", 2, TEN, "Green Apple", BigDecimal.ONE);
+        secondOrderItemDto = new  OrderItemDto("Apple", BigDecimal.valueOf(1), TEN, "Green Apple");
+        secondOrderItemResponseDto = new OrderItemResponseDto(
+                12L,
+                "Apple",
+                BigDecimal.valueOf(2),
+                TEN,
+                "Green Apple",
+                BigDecimal.ONE
+        );
         secondOrderResponse = new OrderResponse(
                 2L,
                 10,

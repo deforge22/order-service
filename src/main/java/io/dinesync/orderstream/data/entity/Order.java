@@ -3,7 +3,6 @@ package io.dinesync.orderstream.data.entity;
 import io.dinesync.orderstream.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;

@@ -42,7 +42,7 @@ public class OrderController {
         return ApiResponseGenerator.ok(orderById, String.format("Order fetched for id: %d", id));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/status")
     public ResponseEntity<ApiResponse<OrderResponse>> updateOrder(
             @PathVariable Long id,
             @NotEmpty(message = "order-status param cannot be null or empty")

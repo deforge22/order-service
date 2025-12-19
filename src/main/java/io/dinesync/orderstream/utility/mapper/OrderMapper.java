@@ -2,6 +2,7 @@ package io.dinesync.orderstream.utility.mapper;
 
 import io.dinesync.orderstream.data.entity.Order;
 import io.dinesync.orderstream.data.entity.OrderItem;
+import io.dinesync.orderstream.rest.model.dto.OrderUpdateMessageDto;
 import io.dinesync.orderstream.rest.model.request.OrderRequest;
 import io.dinesync.orderstream.rest.model.response.OrderResponse;
 import org.mapstruct.Mapper;
@@ -26,6 +27,11 @@ public interface OrderMapper {
     @Mapping(target = "orderItems", source = "orderItems")
     @Mapping(target = "totalAmount", expression = "java(calculateTotalAmount(order.getOrderItems()))")
     OrderResponse toResponse(Order order);
+
+    @Mapping(target = "orderId", source = "id")
+    OrderUpdateMessageDto entityToOrderUpdateMessageDto(Order entity);
+
+
 
     @Named("calculateTotalAmount")
     default BigDecimal calculateTotalAmount(List<OrderItem> orderItems) {

@@ -1,0 +1,139 @@
+# ==================== Spring Boot App VM ====================
+config.vm.define "app" do |app|
+  app.vm.box = "bento/ubuntu-22.04"
+  app.vm.hostname = "order-stream-app"
+  app.vm.network "private_network", ip: "192.168.56.12"
+  app.vm.network "forwarded_port", guest: 8080, host: 8080
+
+  app.vm.provider "parallels" do |prl|
+    prl.memory = 1024
+    prl.cpus = 2
+    prl.name = "order-stream-app"
+  end
+
+  app.vm.synced_folder "../build/libs", "/app/libs"
+
+  app.vm.provision "shell", inline: <<-SHELL
+    echo "==============================================="
+    echo "Installing Java 21..."
+    echo "==============================================="
+
+    sudo apt-get update
+    sudo apt-get install -y openjdk-21-jdk
+
+    java -version
+
+    echo "Java installation complete!"
+
+    # Create app directory
+    sudo mkdir -p /opt/order-stream
+
+    # Create systemd service for auto-start
+    echo "Creating systemd service..."
+    sudo tee /etc/systemd/system/order-stream.service > /dev/null <<EOF
+[Unit]
+Description=Order Stream Spring Boot Application
+After=network.target
+
+[Service]
+Type=simple
+User=vagrant
+WorkingDirectory=/app/libs
+Environment="DB_HOST=192.168.56.10"
+Environment="DB_PORT=5432"
+Environment="DB_NAME=order_service_db"
+Environment="DB_USERNAME=order"
+Environment="DB_PASSWORD=root"
+Environment="REDIS_HOST=192.168.56.11"
+Environment="REDIS_PORT=6379"
+Environment="WS_ALLOWED_ORIGINS=http://192.168.56.12:8080,http://localhost:8080"
+ExecStart=/usr/bin/java -jar /app/libs/order-stream-0.0.1-SNAPSHOT.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # Reload systemd
+    sudo systemctl daemon-reload
+    sudo systemctl enable order-stream
+
+    echo "==============================================="
+    echo "Waiting for PostgreSQL and Redis..."
+    echo "==============================================="
+
+    # Wait for PostgreSQL to be ready
+    echo "Checking PostgreSQL connection..."
+    for i in {1..30}; do
+      if PGPASSWORD=root psql -h 192.168.56.10 -U order -d order_service_db -c "SELECT 1;" &>/dev/null; then
+        echo "✓ PostgreSQL is ready!"
+        break
+      fi
+      echo "Waiting for PostgreSQL... ($i/30)"
+      sleep 2
+    done
+
+    # Wait for Redis to be ready
+    echo "Checking Redis connection..."
+    for i in {1..30}; do
+      if redis-cli -h 192.168.56.11 ping &>/dev/null; then
+        echo "✓ Redis is ready!"
+        break
+      fi
+      echo "Waiting for Redis... ($i/30)"
+      sleep 2
+    done
+
+    # Wait for JAR file to be available
+    echo "Checking for JAR file..."
+    for i in {1..10}; do
+      if [ -f /app/libs/order-stream-0.0.1-SNAPSHOT.jar ]; then
+        echo "✓ JAR file found!"
+        break
+      fi
+      echo "Waiting for JAR file... ($i/10)"
+      sleep 1
+    done
+
+    if [ ! -f /app/libs/order-stream-0.0.1-SNAPSHOT.jar ]; then
+      echo "❌ ERROR: JAR file not found!"
+      echo "Please run: ./gradlew clean bootJar"
+      exit 1
+    fi
+
+    echo "==============================================="
+    echo "Starting Spring Boot application..."
+    echo "==============================================="
+
+    # Start the service
+    sudo systemctl start order-stream
+
+    # Wait a few seconds for app to start
+    sleep 5
+
+    # Check if service is running
+    if sudo systemctl is-active --quiet order-stream; then
+      echo "✅ Application started successfully!"
+      echo ""
+      echo "==============================================="
+      echo "🎉 ORDER STREAM IS READY!"
+      echo "==============================================="
+      echo "Access your application at:"
+      echo "  http://192.168.56.12:8080"
+      echo "  http://localhost:8080"
+      echo ""
+      echo "Check status:"
+      echo "  vagrant ssh app"
+      echo "  sudo systemctl status order-stream"
+      echo ""
+      echo "View logs:"
+      echo "  sudo journalctl -u order-stream -f"
+      echo "==============================================="
+    else
+      echo "❌ Failed to start application!"
+      echo "Check logs with: sudo journalctl -u order-stream -xe"
+    fi
+  SHELL
+end
